@@ -1,0 +1,24 @@
+﻿
+.err-msg {
+    color: red;
+    font-style: italic;
+    text-align: center;
+    display: none;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.alert {
+    display: none;
+    text-align: center;
+}
+
+#employee-table {
+    border-radius: 5px;
+}
+
+input {
+    border-radius: 5px;
+    padding: 0.15em 0.5em;
+}
+

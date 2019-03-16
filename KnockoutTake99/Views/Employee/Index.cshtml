@@ -1,0 +1,271 @@
+﻿@using System.Web.Optimization
+
+@Styles.Render("~/Content/css")
+
+<!-- TEMPLATES -->
+<script type="text/html" id="read">
+    <td data-bind="text: FirstName"></td>
+    <td data-bind="text: LastName"></td>
+    <td>
+        <button data-bind="click: $root.displayEditMode" class="btn btn-success kout-edit">Edit</button>
+        <button data-bind="click: $root.deleteEmp" class="btn btn-danger kout-delete">Delete</button>
+    </td>
+</script>
+
+<script type="text/html" id="edit">
+    <td><input type="text" data-bind="value: FirstName" /></td>
+    <td><input type="text" data-bind="value: LastName" /></td>
+    <td>
+        <button data-bind="click: $root.updateEmp" class="btn btn-success kout-edit-save">Update</button>
+        <button data-bind="click: $root.cancelEditMode" class="btn btn-danger kout-edit-cancel">Cancel</button>
+    </td>
+</script>
+
+<script type="text/html" id="create">
+    <td>
+        <input type="text" data-bind="value: FirstName" />
+    </td>
+    <td><input type="text" data-bind="value: LastName" /></td>
+    <td>
+        <button data-bind="click: $root.createNewEmp" class="btn btn-success kout-create-save">Create</button>
+        <button data-bind="click: $root.removeCreateRow" class="btn btn-danger kout-create-cancel">Cancel</button>
+    </td>
+</script>
+
+<!-- HTML MAIN -->
+<h2 class="display-4">Employees</h2>
+<div class="alert alert-success" id="success-message-create">Successfully created an employee</div>
+<div class="alert alert-success" id="success-message-delete">Successfully deleted an employee</div>
+<div class="alert alert-danger" id="alert-error-message">An error occurred when processing your request. Please try again.</div>
+<p>
+    <button data-bind="click: showCreate" class="btn btn-primary" id="create">Create</button>
+</p>
+<p class="err-msg" id="first-name-err">First Name is required and must be at least 2 characters in length</p>
+<p class="err-msg" id="last-name-err">Last Name is required and must be at least 2 characters in length</p>
+<table class="table table-dark" id="employee-table">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+        </tr>
+    </thead>
+    <tbody data-bind="foreach: Employees">
+        <tr data-bind="template: { name: Mode, data: $data }">
+            <!-- TEMPLATES INSERTED HERE -->
+        </tr>
+       
+    </tbody>
+</table>
+
+@Scripts.Render("~/bundles/scripts")
+
+
+<!-- JS KO -->
+<script type="text/javascript">
+    
+    var validateErrorMessages = (function () {
+        var lastNameErrMsg = $('#last-name-err');
+        var firstNameErrMsg = $('#first-name-err');
+
+        var hideAll = function() {
+            lastNameErrMsg.hide();
+            firstNameErrMsg.hide();
+        };
+
+        var showLastName = function() {
+            lastNameErrMsg.show();
+        };
+
+        var hideLastName = function() {
+            lastNameErrMsg.hide();
+        };
+
+        var showFirstName = function () {
+            firstNameErrMsg.show();
+        };
+
+        var hideFirstName = function() {
+            firstNameErrMsg.hide();
+        };
+
+        return {
+            hideAll: hideAll,
+            showLastName: showLastName,
+            showFirstName: showFirstName,
+            hideLastName: hideLastName,
+            hideFirstName: hideFirstName
+        };
+    }());
+
+    var ajaxAlerts = (function () {
+        var successCreate = $('#success-message-create');
+        var errorAlert = $('#alert-error-message');
+        var successDelete = $('#success-message-delete');
+
+        var hideSuccessCreate = function(speed) {
+            successCreate.hide(speed);
+        };
+
+        var showSuccessCreate = function() {
+            successCreate.show();
+            setTimeout(function() {
+                hideSuccessCreate("slow");
+            }, 5000);
+        };
+
+        var hideSuccessDelete = function (speed) {
+            successDelete.hide(speed);
+        };
+
+        var showSuccessDelete = function () {
+            successDelete.show();
+            setTimeout(function () {
+                hideSuccessDelete("slow");
+            }, 5000);
+        };
+
+        var hideErrorAlert = function(speed) {
+            errorAlert.hide(speed);
+        };
+
+        var showError = function() {
+            errorAlert.show();
+            setTimeout(function () {
+                hideErrorAlert("slow");
+            }, 5000);
+        };
+
+        return {
+            hideSuccessCreate: hideSuccessCreate,
+            showSuccessCreate: showSuccessCreate,
+            hideErrorAlert: hideErrorAlert,
+            showError: showError,
+            hideSuccessDelete: hideSuccessDelete,
+            showSuccessDelete: showSuccessDelete
+        };
+    }());
+
+    function Employee(id, firstName, lastName, mode) {
+        var self = this;
+
+        self.Id = ko.observable(id);
+        self.FirstName = ko.observable(firstName);
+        self.LastName = ko.observable(lastName);
+        self.Mode = ko.observable(mode);
+    }
+    
+    function EmployeeViewModel() {
+        var self = this;
+
+        self.Employees = ko.observableArray();
+
+        // GET Employees
+        $.ajax({
+            type: "GET",
+            url: "/Employee/GetIndex",
+            format: "json",
+            success: function (data) {
+                $(data).each(function (index, item) {
+                    var emp = new Employee(item.Id, item.FirstName, item.LastName, 'read');
+                    self.Employees.push(emp);
+                });
+            },
+            error: function () {
+                alert("Error");
+            }
+        });
+
+        self.showCreate = function() {
+            var createRow = new Employee(0, '', '', 'create');
+            self.Employees.unshift(createRow);
+        };
+
+        self.removeCreateRow = function (item, event) {
+            $(event.target).parent('td').parent('tr').remove();
+            errorMessages.hideAll();
+        };
+
+        self.createNewEmp = function (newEmp, event) {
+            newEmp.FirstName().length < 2 ? validateErrorMessages.showFirstName() : validateErrorMessages.hideFirstName();
+            newEmp.LastName().length < 2 ? validateErrorMessages.showLastName() : validateErrorMessages.hideLastName();
+
+            var newEmpObj = {
+                FirstName: newEmp.FirstName(),
+                LastName: newEmp.LastName()
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/Employee/Create",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(newEmpObj),
+                success: function (id) {
+                    newEmp.Id(id);
+                    newEmp.Mode('read');
+                    ajaxAlerts.showSuccessCreate();
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        };
+
+        self.displayEditMode = function(emp, event) {
+            emp.Mode('edit');
+        };
+
+        self.cancelEditMode = function(emp, event) {
+            emp.Mode('read');
+        };
+
+        self.deleteEmp = function(emp, event) {
+            var empObj = {
+                Id: emp.Id(),
+                FirstName: emp.FirstName(),
+                LastName: emp.LastName()
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/Employee/Delete",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(empObj),
+                success: function (id) {
+                    self.Employees.remove(emp);
+                    ajaxAlerts.showSuccessDelete();
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        };
+
+        self.updateEmp = function(emp, event) {
+            var empObj = {
+                Id: emp.Id(),
+                FirstName: emp.FirstName(),
+                LastName: emp.LastName()
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/Employee/Edit",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(empObj),
+                success: function (id) {
+                    emp.Mode('read');
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        };
+    }
+
+    ko.applyBindings(new EmployeeViewModel());
+
+</script>
+
