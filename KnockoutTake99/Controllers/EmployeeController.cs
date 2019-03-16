@@ -36,7 +36,7 @@ namespace KnockoutTake99.Controllers
                 
             }
 
-            return Json(employee);
+            return Json(employee.Id);
         }
 
         [HttpPost]

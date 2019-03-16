@@ -6,6 +6,7 @@
 <script type="text/html" id="read">
     <td data-bind="text: FirstName"></td>
     <td data-bind="text: LastName"></td>
+    <td data-bind="text: getFullName()"></td>
     <td>
         <button data-bind="click: $root.displayEditMode" class="btn btn-success kout-edit">Edit</button>
         <button data-bind="click: $root.deleteEmp" class="btn btn-danger kout-delete">Delete</button>
@@ -15,6 +16,7 @@
 <script type="text/html" id="edit">
     <td><input type="text" data-bind="value: FirstName" /></td>
     <td><input type="text" data-bind="value: LastName" /></td>
+    <td data-bind="text: getFullName()"></td>
     <td>
         <button data-bind="click: $root.updateEmp" class="btn btn-success kout-edit-save">Update</button>
         <button data-bind="click: $root.cancelEditMode" class="btn btn-danger kout-edit-cancel">Cancel</button>
@@ -26,36 +28,40 @@
         <input type="text" data-bind="value: FirstName" />
     </td>
     <td><input type="text" data-bind="value: LastName" /></td>
+    <td></td>
     <td>
         <button data-bind="click: $root.createNewEmp" class="btn btn-success kout-create-save">Create</button>
         <button data-bind="click: $root.removeCreateRow" class="btn btn-danger kout-create-cancel">Cancel</button>
     </td>
 </script>
 
-<!-- HTML MAIN -->
-<h2 class="display-4">Employees</h2>
-<div class="alert alert-success" id="success-message-create">Successfully created an employee</div>
-<div class="alert alert-success" id="success-message-delete">Successfully deleted an employee</div>
-<div class="alert alert-danger" id="alert-error-message">An error occurred when processing your request. Please try again.</div>
-<p>
-    <button data-bind="click: showCreate" class="btn btn-primary" id="create">Create</button>
-</p>
-<p class="err-msg" id="first-name-err">First Name is required and must be at least 2 characters in length</p>
-<p class="err-msg" id="last-name-err">Last Name is required and must be at least 2 characters in length</p>
-<table class="table table-dark" id="employee-table">
-    <thead>
+<div id="emps">
+    <!-- HTML MAIN -->
+    <h2 class="display-4">Employees: <span data-bind="text: getEmployeeCount()"></span></h2>
+    <div class="alert alert-success" id="success-message-create">Successfully created an employee</div>
+    <div class="alert alert-success" id="success-message-delete">Successfully deleted an employee</div>
+    <div class="alert alert-danger" id="alert-error-message">An error occurred when processing your request. Please try again.</div>
+    <p>
+        <button data-bind="click: showCreate" class="btn btn-primary" id="create">Create</button>
+    </p>
+    <p class="err-msg" id="first-name-err">First Name is required and must be at least 2 characters in length</p>
+    <p class="err-msg" id="last-name-err">Last Name is required and must be at least 2 characters in length</p>
+    <table class="table table-dark" id="employee-table">
+        <thead>
         <tr>
             <th>First Name</th>
             <th>Last Name</th>
+            <th>Full Name</th>
         </tr>
-    </thead>
-    <tbody data-bind="foreach: Employees">
+        </thead>
+        <tbody data-bind="foreach: Employees">
         <tr data-bind="template: { name: Mode, data: $data }">
             <!-- TEMPLATES INSERTED HERE -->
         </tr>
-       
-    </tbody>
-</table>
+
+        </tbody>
+    </table>
+</div>
 
 @Scripts.Render("~/bundles/scripts")
 
@@ -152,6 +158,9 @@
         self.FirstName = ko.observable(firstName);
         self.LastName = ko.observable(lastName);
         self.Mode = ko.observable(mode);
+        self.getFullName = function() {
+            return self.LastName() + ', ' + self.FirstName();
+        }
     }
     
     function EmployeeViewModel() {
@@ -263,9 +272,23 @@
                 }
             });
         };
+
+        self.getEmployeeCount = ko.computed(function () {
+            var count = 0;
+
+            ko.utils.arrayForEach(self.Employees(), function (item) {
+                console.log(item);
+                if (item.Id() > 0) count++;
+            });
+
+            return count;
+        });
     }
 
-    ko.applyBindings(new EmployeeViewModel());
+    
+    $(document).ready(function () {
+        ko.applyBindings(new EmployeeViewModel(), document.getElementById('emps'));
+    });
 
 </script>
 
