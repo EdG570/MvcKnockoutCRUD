@@ -1,4 +1,5 @@
-﻿var validateErrorMessages = (function () {
+﻿/* ----------------- SUCCESS/ERROR ALERTS ----------------- */
+var validateErrorMessages = (function () {
     var lastNameErrMsg = $('#last-name-err');
     var firstNameErrMsg = $('#first-name-err');
 
@@ -80,6 +81,7 @@ var ajaxAlerts = (function () {
     };
 }());
 
+/* ------------------------ CLASSES ------------------------- */
 function Department(id, name) {
     var self = this;
 
@@ -101,6 +103,8 @@ function Employee(id, firstName, lastName, department, mode) {
     };
 }
 
+/* ------------------- VIEWMODEL(S) ----------------------- */
+
 function EmployeeViewModel() {
     var self = this;
 
@@ -110,38 +114,52 @@ function EmployeeViewModel() {
     self.Departments = ko.observableArray();
     self.SelectedDepartment = ko.observable();
 
-    // GET Employees
-    $.ajax({
-        type: "GET",
-        url: "/Employee/GetIndex",
-        format: "json",
-        success: function (data) {
-            $(data).each(function (index, item) {
-                var emp = new Employee(item.Id, item.FirstName, item.LastName, item.Department, 'read');
-                self.Employees.push(emp);
-            });
-        },
-        error: function () {
-            alert("Error");
-        }
-    });
-
-    self.getDepartments = function () {
+    /* -------------- START INITIALIZE -------------*/
+    self.GetEmployees = function() {
         $.ajax({
             type: "GET",
-            url: "/Employee/GetDepartments",
+            url: "/Employee/GetIndex",
             format: "json",
             success: function (data) {
                 $(data).each(function (index, item) {
-                    var department = new Department(item.Id, item.Name);
-                    self.Departments.push(department);
+                    var emp = new Employee(item.Id, item.FirstName, item.LastName, item.Department, 'read');
+                    self.Employees.push(emp);
                 });
             },
             error: function () {
-                ajaxAlerts.showError();
+                alert("Error");
             }
         });
     };
+
+    self.dropdowns = {
+        getDepartments: function() {
+            $.ajax({
+                type: "GET",
+                url: "/Employee/GetDepartments",
+                format: "json",
+                success: function (data) {
+                    $(data).each(function (index, item) {
+                        var department = new Department(item.Id, item.Name);
+                        self.Departments.push(department);
+                    });
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        }
+    };
+
+    self.initialize = (function () {
+        self.GetEmployees();
+
+        if (self.Departments().length === 0) {
+            self.dropdowns.getDepartments();
+        }
+    }());
+
+    /* ------------- END INITIALIZE -------------- */
 
     self.showCreate = function () {
         var createRow = new Employee(0, '', '', '', 'create');
@@ -153,89 +171,93 @@ function EmployeeViewModel() {
         validateErrorMessages.hideAll();
     };
 
-    self.createNewEmp = function (newEmp, event) {
-        newEmp.FirstName().length < 2 ? validateErrorMessages.showFirstName() : validateErrorMessages.hideFirstName();
-        newEmp.LastName().length < 2 ? validateErrorMessages.showLastName() : validateErrorMessages.hideLastName();
+    self.crud = {
+        createNewEmp: function (newEmp, event) {
+            newEmp.FirstName().length < 2 ? validateErrorMessages.showFirstName() : validateErrorMessages.hideFirstName();
+            newEmp.LastName().length < 2 ? validateErrorMessages.showLastName() : validateErrorMessages.hideLastName();
 
-        var newEmpObj = {
-            FirstName: newEmp.FirstName(),
-            LastName: newEmp.LastName(),
-            Department: parseInt(self.SelectedDepartment())
-        };
+            var newEmpObj = {
+                FirstName: newEmp.FirstName(),
+                LastName: newEmp.LastName(),
+                Department: parseInt(self.SelectedDepartment())
+            };
 
-        $.ajax({
-            type: "POST",
-            url: "/Employee/Create",
-            contentType: "application/json;charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(newEmpObj),
-            success: function (id) {
-                newEmp.Id(id);
-                newEmp.Department(self.SelectedDepartment());
-                newEmp.Mode('read');
-                ajaxAlerts.showSuccessCreate();
-            },
-            error: function () {
-                ajaxAlerts.showError();
-            }
-        });
+            $.ajax({
+                type: "POST",
+                url: "/Employee/Create",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(newEmpObj),
+                success: function (id) {
+                    newEmp.Id(id);
+                    newEmp.Department(self.SelectedDepartment());
+                    newEmp.Mode('read');
+                    ajaxAlerts.showSuccessCreate();
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        },
+        deleteEmp: function(emp, event) {
+            var empObj = {
+                Id: emp.Id(),
+                FirstName: emp.FirstName(),
+                LastName: emp.LastName(),
+                Department: emp.Department()
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/Employee/Delete",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(empObj),
+                success: function (id) {
+                    self.Employees.remove(emp);
+                    ajaxAlerts.showSuccessDelete();
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        },
+        updateEmp: function(emp, event) {
+            var empObj = {
+                Id: emp.Id(),
+                FirstName: emp.FirstName(),
+                LastName: emp.LastName(),
+                Department: parseInt(self.SelectedDepartment())
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/Employee/Edit",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                data: JSON.stringify(empObj),
+                success: function (id) {
+                    emp.Department(self.SelectedDepartment());
+                    emp.Mode('read');
+                },
+                error: function () {
+                    ajaxAlerts.showError();
+                }
+            });
+        }
     };
 
-    self.displayEditMode = function (emp, event) {
-        self.SelectedDepartment = emp.Department();
-        emp.Mode('edit');
-    };
+    self.modes = {
+        displayEditMode: function(emp, event) {
+            self.SelectedDepartment(emp.Department());
+            emp.Mode('edit');
+        },
+        cancelEditMode: function(emp, event) {
+            emp.Mode('read');
+        }
+    }
 
-    self.cancelEditMode = function (emp, event) {
-        emp.Mode('read');
-    };
-
-    self.deleteEmp = function (emp, event) {
-        var empObj = {
-            Id: emp.Id(),
-            FirstName: emp.FirstName(),
-            LastName: emp.LastName(),
-            Department: emp.Department()
-        };
-
-        $.ajax({
-            type: "POST",
-            url: "/Employee/Delete",
-            contentType: "application/json;charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(empObj),
-            success: function (id) {
-                self.Employees.remove(emp);
-                ajaxAlerts.showSuccessDelete();
-            },
-            error: function () {
-                ajaxAlerts.showError();
-            }
-        });
-    };
-
-    self.updateEmp = function (emp, event) {
-        var empObj = {
-            Id: emp.Id(),
-            FirstName: emp.FirstName(),
-            LastName: emp.LastName(),
-            Department: parseInt(emp.Department())
-        };
-
-        $.ajax({
-            type: "POST",
-            url: "/Employee/Edit",
-            contentType: "application/json;charset=utf-8",
-            dataType: "json",
-            data: JSON.stringify(empObj),
-            success: function (id) {
-                emp.Mode('read');
-            },
-            error: function () {
-                ajaxAlerts.showError();
-            }
-        });
-    };
+    /* -------------- COMPUTED FUNCTIONS -------------- */
 
     self.getEmployeeCount = ko.computed(function () {
         var count = 0;
@@ -248,11 +270,7 @@ function EmployeeViewModel() {
         return count;
     });
 
-    self.initialize = (function () {
-        if (self.Departments().length === 0) {
-            self.getDepartments();
-        }  
-    }());
+    
 }
 
 
