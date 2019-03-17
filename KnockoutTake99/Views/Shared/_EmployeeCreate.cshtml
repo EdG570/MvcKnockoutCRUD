@@ -1,0 +1,19 @@
+﻿<td>
+    <input type="text" data-bind="value: FirstName" />
+</td>
+<td><input type="text" data-bind="value: LastName" /></td>
+<td></td>
+<td>
+    <select data-bind="options: $root.Departments,
+                       optionsText: 'Name',
+                       optionsValue: 'Id',
+                       value: $root.SelectedDepartment,
+                       optionsCaption: '-- Department --'"
+            class="form-control">
+        
+    </select>
+</td>
+<td>
+    <button data-bind="click: $root.createNewEmp" class="btn btn-success kout-create-save">Create</button>
+    <button data-bind="click: $root.removeCreateRow" class="btn btn-danger kout-create-cancel">Cancel</button>
+</td>

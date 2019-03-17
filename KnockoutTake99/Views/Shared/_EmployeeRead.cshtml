@@ -1,0 +1,8 @@
+﻿<td data-bind="text: FirstName"></td>
+<td data-bind="text: LastName"></td>
+<td data-bind="text: getFullName()"></td>
+<td data-bind="text: Department"></td>
+<td>
+    <button data-bind="click: $root.displayEditMode" class="btn btn-success kout-edit">Edit</button>
+    <button data-bind="click: $root.deleteEmp" class="btn btn-danger kout-delete">Delete</button>
+</td>

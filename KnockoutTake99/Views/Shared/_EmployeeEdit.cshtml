@@ -1,0 +1,15 @@
+﻿<td><input type="text" data-bind="value: FirstName" /></td>
+<td><input type="text" data-bind="value: LastName" /></td>
+<td data-bind="text: getFullName()"></td>
+<td>
+    <select data-bind="options: $root.Departments,
+                       optionsText: 'Name',
+                       optionsValue: 'Id',
+                       value: $root.SelectedDepartment,
+                       optionsCaption: '-- Department --'"
+            class="form-control"></select>
+</td>
+<td>
+    <button data-bind="click: $root.updateEmp" class="btn btn-success kout-edit-save">Update</button>
+    <button data-bind="click: $root.cancelEditMode" class="btn btn-danger kout-edit-cancel">Cancel</button>
+</td>

@@ -188,7 +188,7 @@
     <Content Include="Scripts\jquery-3.3.1.slim.min.js" />
     <Content Include="Scripts\knockout-3.5.0.debug.js" />
     <Content Include="Scripts\knockout-3.5.0.js" />
-    <Content Include="Scripts\main.js" />
+    <Content Include="Scripts\employee.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\popper-utils.js" />
     <Content Include="Scripts\popper-utils.min.js" />
@@ -227,8 +227,13 @@
     <Compile Include="Migrations\201903152110010_SeedEmployees.Designer.cs">
       <DependentUpon>201903152110010_SeedEmployees.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201903162317536_AddDepartmentColumnToEmployee.cs" />
+    <Compile Include="Migrations\201903162317536_AddDepartmentColumnToEmployee.Designer.cs">
+      <DependentUpon>201903162317536_AddDepartmentColumnToEmployee.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
+    <Compile Include="Models\DepartmentList.cs" />
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -240,6 +245,9 @@
     </Content>
     <Content Include="Scripts\jquery-3.3.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.3.1.min.map" />
+    <Content Include="Views\Shared\_EmployeeRead.cshtml" />
+    <Content Include="Views\Shared\_EmployeeEdit.cshtml" />
+    <Content Include="Views\Shared\_EmployeeCreate.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -256,6 +264,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201903152110010_SeedEmployees.resx">
       <DependentUpon>201903152110010_SeedEmployees.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201903162317536_AddDepartmentColumnToEmployee.resx">
+      <DependentUpon>201903162317536_AddDepartmentColumnToEmployee.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

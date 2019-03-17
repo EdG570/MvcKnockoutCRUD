@@ -9,8 +9,11 @@ namespace KnockoutTake99.App_Start
         {
             bundles.Add(new ScriptBundle("~/bundles/scripts").Include(
                 "~/Scripts/jquery-3.3.1.js",
-                "~/Scripts/knockout-3.5.0.js",
-                "~/Scripts/main.js"
+                "~/Scripts/knockout-3.5.0.js"
+            ));
+
+            bundles.Add(new ScriptBundle("~/bundles/employee").Include(
+                "~/Scripts/employee.js"
             ));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(

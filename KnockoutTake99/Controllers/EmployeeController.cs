@@ -1,5 +1,6 @@
 ﻿using KnockoutTake99.Models;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
@@ -29,14 +30,21 @@ namespace KnockoutTake99.Controllers
         [HttpPost]
         public JsonResult Create(Employee employee)
         {
+            var newEmp = new Employee
+            {
+                FirstName = employee.FirstName,
+                LastName = employee.LastName,
+                Department = Convert.ToInt32(employee.Department)
+            };
+
             if (ModelState.IsValid)
             {
-                _db.Employees.Add(employee);
+                _db.Employees.Add(newEmp);
                 _db.SaveChanges();
                 
             }
 
-            return Json(employee.Id);
+            return Json(newEmp.Id);
         }
 
         [HttpPost]
@@ -72,6 +80,18 @@ namespace KnockoutTake99.Controllers
             }
 
             return Json(empToDelete.Id);
+        }
+
+        public JsonResult GetDepartments()
+        {
+            var departments = new List<DepartmentList>
+            {
+                new DepartmentList { Id = 1, Name = "Finance" },
+                new DepartmentList { Id = 2, Name = "Security" },
+                new DepartmentList { Id = 3, Name = "Reporting" }
+            };
+
+            return Json(departments, JsonRequestBehavior.AllowGet);
         }
     }
 }
