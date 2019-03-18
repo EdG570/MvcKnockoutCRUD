@@ -1,4 +1,7 @@
-﻿
+﻿html {
+    letter-spacing: 1px;
+}
+
 .err-msg {
     color: red;
     font-style: italic;
@@ -22,3 +25,17 @@ input {
     padding: 0.15em 0.5em;
 }
 
+.table-header {
+    text-align: center;
+    font-size: 1.4em;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.body-content {
+    padding-top: 5em;
+}
+
+.pointer {
+    cursor: pointer
+}

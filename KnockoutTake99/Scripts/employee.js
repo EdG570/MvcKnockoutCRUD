@@ -114,7 +114,85 @@ function EmployeeViewModel() {
     self.Departments = ko.observableArray();
     self.SelectedDepartment = ko.observable();
 
-    /* -------------- START INITIALIZE -------------*/
+    /* ------------ TEXT SEARCH ------------ */
+
+    self.searchText = ko.observable();
+
+    self.filteredEmployees = ko.computed(function () {
+        if (!self.searchText() || self.searchText().trim().length === 0) {
+            return self.Employees();
+        } else {
+            var filter = self.searchText().toLowerCase();
+            return ko.utils.arrayFilter(self.Employees(), function (item) {
+                return item.LastName().toLowerCase().indexOf(filter) !== -1;
+            });
+        }
+    });
+
+    /* ------------ SORTING ------------ */
+
+    self.CurrentSort = {
+        lastName: ko.observable(),
+        department: ko.observable()
+    };
+
+    self.sort = {
+        byLastName: function () {
+
+            self.CurrentSort.department(null);
+
+            if (self.CurrentSort.lastName() === 'desc' || !self.CurrentSort.lastName()) {
+                
+                self.Employees().sort(function (left, right) {
+                    return left.LastName().toUpperCase() === right.LastName().toUpperCase() ? 0
+                         : left.LastName().toUpperCase() < right.LastName().toUpperCase() ? -1
+                         : 1;
+                });
+
+                self.Employees.valueHasMutated();
+                self.CurrentSort.lastName('asc');
+               
+            } else {
+                
+                self.Employees().sort(function (left, right) {
+                    return left.LastName().toUpperCase() === right.LastName().toUpperCase() ? 0
+                         : left.LastName().toUpperCase() > right.LastName().toUpperCase() ? -1
+                         : 1;
+                });
+
+                self.Employees.valueHasMutated();
+                self.CurrentSort.lastName('desc');
+            }
+        },
+        byDepartment: function () {
+
+            self.CurrentSort.lastName(null);
+
+            if (self.CurrentSort.department() === 'desc' || !self.CurrentSort.department()) {
+
+                self.Employees().sort(function (left, right) {
+                    return left.Department() === right.Department() ? 0
+                         : left.Department() < right.Department() ? -1
+                         : 1;
+                });
+
+                self.Employees.valueHasMutated();
+                self.CurrentSort.department('asc');
+            } else {
+
+                self.Employees().sort(function (left, right) {
+                    return left.Department() === right.Department() ? 0
+                         : left.Department() > right.Department() ? -1
+                         : 1;
+                });
+
+                self.Employees.valueHasMutated();
+                self.CurrentSort.department('desc');
+            }
+        }
+    };
+
+    /* -------------- START INITIALIZE ------------- */
     self.GetEmployees = function() {
         $.ajax({
             type: "GET",
@@ -125,6 +203,8 @@ function EmployeeViewModel() {
                     var emp = new Employee(item.Id, item.FirstName, item.LastName, item.Department, 'read');
                     self.Employees.push(emp);
                 });
+
+                self.sort.byLastName();
             },
             error: function () {
                 alert("Error");
@@ -263,14 +343,11 @@ function EmployeeViewModel() {
         var count = 0;
 
         ko.utils.arrayForEach(self.Employees(), function (item) {
-            console.log(item);
             if (item.Id() > 0) count++;
         });
 
         return count;
-    });
-
-    
+    }); 
 }
 
 

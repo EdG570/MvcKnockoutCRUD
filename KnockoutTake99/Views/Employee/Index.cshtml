@@ -17,25 +17,42 @@
 
 <div id="emps">
     <!-- HTML MAIN -->
-    <h2 class="display-4">Employees: <span data-bind="text: getEmployeeCount()"></span></h2>
     <div class="alert alert-success" id="success-message-create">Successfully created an employee</div>
     <div class="alert alert-success" id="success-message-delete">Successfully deleted an employee</div>
     <div class="alert alert-danger" id="alert-error-message">An error occurred when processing your request. Please try again.</div>
-    <p>
-        <button data-bind="click: showCreate" class="btn btn-primary" id="create">Create</button>
-    </p>
+  
+    <button data-bind="click: showCreate" class="btn btn-primary" id="create">Create</button>
+    <input type="search" 
+           class="form-control" 
+           data-bind="value: searchText, valueUpdate: 'keyup', event: { keyup: filteredEmployees }" 
+           autocomplete="off" 
+           placeholder="Search"
+    />
+    
     <p class="err-msg" id="first-name-err">First Name is required and must be at least 2 characters in length</p>
     <p class="err-msg" id="last-name-err">Last Name is required and must be at least 2 characters in length</p>
     <table class="table table-dark" id="employee-table">
         <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Full Name</th>
-                <th>Department</th>
-            </tr>
+        <tr>
+            <th class="table-header" colspan="5">Employees <span data-bind="text: getEmployeeCount()"></span></th>
+        </tr>
+        <tr>
+            <th>First Name</th>
+            <th data-bind="click: sort.byLastName" class="pointer">
+                Last Name
+                <span data-bind="visible: CurrentSort.lastName() == 'asc'"><img src="~/Content/images/sort-up-arrow.png"/></span>
+                <span data-bind="visible: CurrentSort.lastName() == 'desc'"><img src="~/Content/images/sort-down-arrow.png"/></span>
+            </th>
+            <th>Full Name</th>
+            <th data-bind="click: sort.byDepartment" class="pointer">
+                Department
+                <span data-bind="visible: CurrentSort.department() == 'asc'"><img src="~/Content/images/sort-up-arrow.png" /></span>
+                <span data-bind="visible: CurrentSort.department() == 'desc'"><img src="~/Content/images/sort-down-arrow.png" /></span>
+            </th>
+            <th>Action(s)</th>
+        </tr>
         </thead>
-        <tbody data-bind="foreach: Employees">
+        <tbody data-bind="foreach: filteredEmployees()">
             <tr data-bind="template: { name: Mode, data: $data }">
                 <!-- TEMPLATES INSERTED HERE -->
             </tr>
